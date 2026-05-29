@@ -21,7 +21,25 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
+@st.cache_data
+def load_data():
+    # Đọc file CSV
+    df = pd.read_csv("Demo 6 - Sheet1.csv")
+    
+    # TỰ ĐỘNG SỬA LỖI: Xóa khoảng trắng thừa ở đầu/cuối tên tất cả các cột
+    df.columns = df.columns.str.strip()
+    
+    # Kiểm tra xem có cột thời gian nào chứa chữ "Thời điểm" không để tự chọn
+    col_time = [c for c in df.columns if 'Thời điểm' in c]
+    if col_time:
+        target_col = col_time[0]
+        df[target_col] = pd.to_datetime(df[target_col], errors='coerce')
+        df['Giờ'] = df[target_col].dt.strftime('%H:00')
+    else:
+        # Nếu hoàn toàn không tìm thấy thì tự tạo cột Giờ giả lập để không bị sập web
+        df['Giờ'] = '00:00'
+        
+    return df
 # 2. Đọc dữ liệu từ file CSV bạn đã tải lên cùng thư mục
 @st.cache_data
 def load_data():
